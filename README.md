@@ -7,7 +7,7 @@
     avr-objcopy -Osrec avr.o avr.sr
     uisp -dprog=stk200 --erase --upload if=avr.sr
 
-### To open a serial terminal on a LTH control PC, connected to ATmeaga8 AVR
+#### To open a serial terminal on a LTH control PC, connected to ATmeaga8 AVR
     simcom -38400 /dev/ttyS0
 
 
