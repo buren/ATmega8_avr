@@ -14,9 +14,6 @@
 ### Doc
 http://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html#avr_signames
 
-UART_RXC_vect   => USART, Receive Complete
-USART_TXC_vect  => USART, Transmission Complete
-
 #### If USB porta yanked
     java.io.IOException: Input/output error in nativeavailable
       at gnu.io.RXTXPort.nativeavailable(Native Method)
