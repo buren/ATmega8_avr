@@ -1,14 +1,11 @@
-## ATmega8 AVR
+## ATmega16 AVR
 
 ### Compile
-    avr-gcc -mmcu=atmega8 -O -g -Wall -o avr.o avr.c
+    avr-gcc -mmcu=atmega16 -O -g -Wall -o avr.o avr.c
 
-### Upload to ATmega8 AVR
+### Upload to ATmega16 AVR
     avr-objcopy -Osrec avr.o avr.sr
     uisp -dprog=stk200 --erase --upload if=avr.sr
-
-#### To open a serial terminal on a LTH control PC, connected to ATmeaga8 AVR
-    simcom -38400 /dev/ttyS0
 
 
 ### Doc

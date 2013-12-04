@@ -18,8 +18,6 @@
  * To view the assembler code:
  * avr-objdump -S avr.o
  *
- * To open a serial terminal on the PC:
- * simcom -38400 /dev/ttyS0
  */
 
 #include <avr/io.h>
@@ -27,8 +25,9 @@
 
 /* Controller parameters and variables (add your own code here) */
 
-int8_t on = 0;                     /* 0=off, 1=on */
-int16_t r = 255;                   /* Reference, corresponds to +5.0 V */
+char buffer[10];
+int bytes_to_read = 0;
+int buffer_pos = 0;
 
 /**
  * Write a character on the serial connection
@@ -65,33 +64,51 @@ static inline int16_t readInput(char chan) {
  * UART_RXC_vect => USART Receive Complete.
  */
 ISR(USART_RXC_vect){
-  switch (UDR) {
-  case 's':                        /* Start the controller */
-    put_char('s');
-    on = 1;
-    break;
-  case 't':                        /* Stop the controller */
-    put_char('t');
-    on = 0;
-    break;
-  }
-}
+    char c = UDR; //read char from serial port
 
-/**
- * Interrupt handler for the periodic timer. Interrupts are generated
- * every 10 ms. The control algorithm is executed every 50 ms.
- * TIMER2_COMP_vect => Timer/Counter2 Compare Match
- */
-ISR(TIMER2_COMP_vect){
-  static int8_t ctr = 0;
-  if (++ctr < 5) return;
-  ctr = 0;
-  if (on) {
-    /* Insert your controller code here */
-
-  } else {
-    writeOutput(0);     /* Off */
-  }
+    if (bytes_to_read > 0)
+    {
+        buffer[buffer_pos++] = c;
+        --bytes_to_read;
+        if (bytes_to_read == 0)
+        {
+            int16_t data;
+            switch (buffer[0])
+            {
+            case 'R':
+                data = readInput(buffer[1]);
+                put_char('S');
+                put_char(buffer[1]);
+                put_char(data >> 8);
+                put_char(data & 0xff);
+                break;
+            case 'W':
+                data = buffer[1] | (buffer[2] << 8);
+                writeOutput(data);
+                put_char(1);
+                put_char(2);
+                put_char(3);
+		put_char(4);
+                break;
+            }
+        }
+    }
+    else
+    {
+        switch (c)
+        {
+        case 'R':                        /* Read value */
+            buffer_pos = 0;
+            buffer[buffer_pos++] = 'R';
+            bytes_to_read = 1;
+            break;
+        case 'W':                        /* Write value */
+            buffer_pos = 0;
+            buffer[buffer_pos++] = 'W';
+            bytes_to_read = 2;
+            break;
+        }
+    }
 }
 
 /**
@@ -99,7 +116,7 @@ ISR(TIMER2_COMP_vect){
  */
 int main(){
 
-  DDRB = 0x02;    /* Enable PWM output for ATmega8 */
+  //DDRB = 0x02;    /* Enable PWM output for ATmega8 */
   DDRD = 0x20;    /* Enable PWM output for ATmega16 */
   DDRC = 0x30;    /* Enable time measurement pins */
   ADCSRA = 0xc7;  /* ADC enable */
