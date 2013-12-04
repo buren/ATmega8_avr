@@ -23,7 +23,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-/* Controller parameters and variables (add your own code here) */
 
 char buffer[10];
 int bytes_to_read = 0;
@@ -41,7 +40,7 @@ static inline void put_char(char ch){
  * Write 10-bit output using the PWM generator
  */
 static inline void writeOutput(int16_t val) {
-  val += 512;
+  val += 539;
   OCR1AH = (uint8_t) (val>>8);
   OCR1AL = (uint8_t) val;
 }
@@ -85,10 +84,10 @@ ISR(USART_RXC_vect){
             case 'W':
                 data = buffer[1] | (buffer[2] << 8);
                 writeOutput(data);
-                put_char(1);
-                put_char(2);
-                put_char(3);
-		put_char(4);
+                put_char('A');
+                put_char('A');
+                put_char('A');
+		put_char('A');
                 break;
             }
         }
@@ -124,16 +123,14 @@ int main(){
   TCCR1A = 0xf3;  /* Timer 1: OC1A & OC1B 10 bit fast PWM */
   TCCR1B = 0x09;  /* Clock / 1 */
 
-  TCNT2 = 0x00;   /* Timer 2: Reset counter (periodic timer) */
-  TCCR2 = 0x0f;   /* Clock / 1024, clear after compare match (CTC) */
-  OCR2 = 144;     /* Set the compare value, corresponds to ~100 Hz */
-
   /* Configure serial communication */
   UCSRA = 0x00;   /* USART: */
   UCSRB = 0x98;   /* USART: RXC enable, Receiver enable, Transmitter enable */
   UCSRC = 0x86;   /* USART: 8bit, no parity */
-  UBRRH = 0x00;   /* USART: 38400 @ 14.7456MHz */
-  UBRRL = 23;     /* USART: 38400 @ 14.7456MHz */
+  UBRRH = 0x00;   /* USART: 57600 @ 14.7456MHz */
+  UBRRL = 15;     /* USART: 57600 @ 14.7456MHz */
+  //UBRRH = 0x00;   /* USART: 38400 @ 14.7456MHz */
+  //UBRRL = 23;     /* USART: 38400 @ 14.7456MHz */
 
   TIMSK = 1<<OCIE2; /* Start periodic timer */
 
